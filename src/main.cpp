@@ -60,14 +60,14 @@ int main(int argc, const char **argv)
     float end_x = 0.0;
     float end_y = 0.0;
 
-    cout << "Enter the start x value:";
+    cout << "Enter the start x value: ";
     cin >> start_x;
-    cout << "Enter the start y value:";
+    cout << "Enter the start y value: ";
     cin >> start_y;
-    cout << "Enter the end x value:";
+    cout << "Enter the end x value: ";
     cin >> end_x;
-    cout << "Enter the end y value:";
-    cin >> end_x;
+    cout << "Enter the end y value: ";
+    cin >> end_y;
 
   
     // Build Model.

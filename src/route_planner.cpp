@@ -20,7 +20,7 @@ RoutePlanner::RoutePlanner(RouteModel &model, float start_x, float start_y, floa
 
 // Calculates and returns the H value for a given node.
 float RoutePlanner::CalculateHValue(RouteModel::Node const *node) {
-    float distance = node->distance(*end_node);
+    const float distance = node->distance(*end_node);
     return distance;
 }
 
@@ -29,27 +29,25 @@ float RoutePlanner::CalculateHValue(RouteModel::Node const *node) {
 // already been visited to the open_list.
 void RoutePlanner::AddNeighbors(RouteModel::Node *current_node) {
     current_node->FindNeighbors();
-    for (RouteModel::Node *neighbor : current_node->neighbors) {
+    for (RouteModel::Node* neighbor : current_node->neighbors) {
         neighbor->parent = current_node;
         neighbor->h_value = CalculateHValue(neighbor);
         neighbor->g_value = current_node->g_value + neighbor->distance(*current_node);
         neighbor->visited = true;
         open_list.emplace_back(neighbor);
     }
-
 }
 
-
-// Comparison function for sorting open_list in non-increasing order.
-bool NodeComparison(RouteModel::Node* a, RouteModel::Node* b) { 
-  return ((a->g_value + a->h_value) > (b->g_value + b->h_value)); 
-}
 
 // NextNode method removes and returns a pointer to the smallest element from open_list.
 RouteModel::Node *RoutePlanner::NextNode() {
   // Sort the vector in non-increasing order to take advantage of O(1) removal of
-  // element from back of vector.
-  std::sort (open_list.begin(), open_list.end(), NodeComparison); 
+  // element from back of vector later on. Uses lambda expression.
+  std::sort (open_list.begin(), open_list.end(), 
+             [](RouteModel::Node* a, RouteModel::Node* b) 
+    { 
+        return ((a->g_value + a->h_value) > (b->g_value + b->h_value)); 
+    }); 
   
   RouteModel::Node* last_elem = open_list.back();
   open_list.pop_back();
@@ -94,19 +92,19 @@ void RoutePlanner::AStarSearch() {
   start_node->visited = true;
   AddNeighbors(start_node);
   
-  // Continue searching until the end node is found.
-  bool finished = false;
-  while (not finished) {
+  // Continue searching while open_list is not empty.
+  while(!open_list.empty()){
     current_node = NextNode();
     current_node->visited = true;
-    AddNeighbors(current_node);
     
     // Finish iterating if the end node is found.
     if (current_node == end_node) {
-      finished = true;
+      break;
     }
+    
+    AddNeighbors(current_node);
   }
   
   // Construct and save the final path.
-  m_Model.path = ConstructFinalPath(current_node);
+  m_Model.path = ConstructFinalPath(end_node);
 }
